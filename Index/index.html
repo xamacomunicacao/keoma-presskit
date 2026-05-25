@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>Press kit PRO - BIASSUS</title>
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <section class="hero-section">
+        <div class="canvas-container">
+            <canvas id="hero-lightpass"></canvas>
+            <div class="overlay"></div>
+        </div>
+        
+        <div class="hero-content">
+            <img src="assets/logo-keoma.svg" alt="Keoma Logo" class="hero-logo">
+            
+            <div class="hero-nav-buttons">
+                <a href="#bio" class="nav-circle-btn">
+                    <i class="fa-solid fa-align-left"></i>
+                    <span>BIO</span>
+                </a>
+                <a href="#tracks" class="nav-circle-btn">
+                    <i class="fa-solid fa-play"></i>
+                    <span>TRACKS AND<br>DJ SETS</span>
+                </a>
+                <a href="#contacts" class="nav-circle-btn">
+                    <i class="fa-solid fa-at"></i>
+                    <span>CONTACTS</span>
+                </a>
+            </div>
+
+            <div class="hero-social-icons">
+                <a href="https://www.instagram.com/keomadj/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://www.tiktok.com/@biassus" target="_blank"><i class="fa-brands fa-tiktok"></i></a>
+                <a href="https://open.spotify.com/artist/77e9G3z60xRWDt4VpvM2p5" target="_blank"><i class="fa-brands fa-spotify"></i></a>
+                <a href="https://www.youtube.com/channel/UCS932rUx5ytciyHvONbrS7A" target="_blank"><i class="fa-brands fa-youtube"></i></a>
+                <a href="https://www.mixcloud.com/biassus/" target="_blank"><i class="fa-brands fa-soundcloud"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dates Section -->
+    <section class="dates-section section-padding" id="dates">
+        <div class="container">
+            <h2 class="section-title">NEXT DATES:</h2>
+            <div class="dates-table">
+                <div class="date-header">
+                    <div>EVENT</div>
+                    <div>CITY</div>
+                    <div>DATE</div>
+                </div>
+                <div id="dynamic-agenda-container">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+            
+            <div class="divider"></div>
+        </div>
+    </section>
+
+    <!-- Media Section -->
+    <section class="media-section section-padding" id="tracks">
+        <div class="container">
+            <h2 class="section-title">MÚSICAS E SHOWS</h2>
+            <div class="divider"></div>
+            
+            <div class="video-grid" id="dynamic-video-grid">
+                <!-- Preenchido via JS -->
+            </div>
+
+            <!-- Spotify / Soundcloud -->
+            <div class="audio-embeds">
+                <h3 class="subsection-title">Top Tracks</h3>
+                <iframe style="border-radius:12px" src="https://open.spotify.com/embed/artist/7b3fSS9sTcg0Hczx5LGDiN?utm_source=generator" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+            </div>
+        </div>
+    </section>
+
+    <!-- Instagram Section -->
+    <section class="instagram-section section-padding" id="instagram" style="display: none;">
+        <div class="container">
+            <h2 class="section-title">DESCUBRA</h2>
+            <div class="divider"></div>
+            <div id="dynamic-instagram-container" style="display: flex; justify-content: center; margin-top: 30px;">
+                <!-- Preenchido via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Bio Section -->
+    <section class="bio-section section-padding" id="bio">
+        <div class="container">
+            <h2 class="section-title">O ARTISTA</h2>
+            
+            <div class="lang-switcher">
+                <button class="lang-btn active" data-lang="pt">PT-BR</button>
+                <button class="lang-btn" data-lang="en">EN</button>
+                <button class="lang-btn" data-lang="es">ESP</button>
+            </div>
+
+            <div class="bio-content" id="bio-pt">
+                <p><strong>Keoma</strong> é DJ e produtor de Manaus, conhecido por unir a força selvagem da Amazônia com a estética urbana. Seu som pesado, agressivo e profundamente emocional, transita entre 128 e 135 BPM, misturando basslines firmes com atmosferas místicas da floresta.</p>
+                <p>Chamado de “A Onça da Música Eletrônica”, <strong>Keoma</strong> leva para o palco uma persona intensa e silenciosa, onde o olhar fala mais que qualquer sorriso.</p>
+                <p>Com faixas como <em>Into the Trees</em>, <em>Whisper in the Canopy</em> e <em>Black River</em>, ele se firma como um dos nomes mais autênticos da cena eletrônica amazônica, trazendo uma identidade única a selva que invade o concreto.</p>
+            </div>
+            
+            <div class="bio-content hidden" id="bio-en">
+                <p><strong>Keoma</strong> is a DJ and producer from Manaus, known for uniting the wild strength of the Amazon with urban aesthetics. His heavy, aggressive, and deeply emotional sound ranges between 128 and 135 BPM, mixing firm basslines with mystical forest atmospheres.</p>
+                <p>Called "The Jaguar of Electronic Music", <strong>Keoma</strong> brings an intense and silent persona to the stage, where his eyes speak more than any smile.</p>
+                <p>With tracks like <em>Into the Trees</em>, <em>Whisper in the Canopy</em>, and <em>Black River</em>, he establishes himself as one of the most authentic names in the Amazonian electronic scene, bringing a unique identity to the jungle that invades the concrete.</p>
+            </div>
+            
+            <div class="bio-content hidden" id="bio-es">
+                <p><strong>Keoma</strong> es un DJ y productor de Manaus, conocido por unir la fuerza salvaje de la Amazonía con la estética urbana. Su sonido pesado, agresivo y profundamente emocional, oscila entre 128 y 135 BPM, mezclando líneas de bajo firmes con atmósferas místicas de la selva.</p>
+                <p>Llamado "El Jaguar de la Música Electrónica", <strong>Keoma</strong> lleva al escenario una personalidad intensa y silenciosa, donde su mirada habla más que cualquier sonrisa.</p>
+                <p>Con temas como <em>Into the Trees</em>, <em>Whisper in the Canopy</em> y <em>Black River</em>, se consolida como uno de los nombres más auténticos de la escena electrónica amazónica, aportando una identidad única a la selva que invade el hormigón.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contacts Section -->
+    <section class="contacts-section section-padding" id="contacts">
+        <div class="container">
+            <h2 class="section-title">CONTACT FOR SHOWS</h2>
+            <div class="contact-links">
+                <a href="https://wa.me/5592991744506" class="contact-btn">WhatsApp</a>
+                <a href="mailto:gigs.biassus@gmail.com" class="contact-btn">Email</a>
+                <a href="https://www.instagram.com/keomadj/" class="contact-btn">Instagram</a>
+            </div>
+            
+            <div class="vip-list">
+                <h3>Assine a Newsletter</h3>
+                <p style="font-size: 0.9rem; margin-bottom: 15px; color: #ccc;">Receba atualizações da agenda e novidades exclusivas do Keoma em primeira mão.</p>
+                <form class="vip-form" id="newsletter-form">
+                    <input type="text" id="nl-name" placeholder="Nome" required>
+                    <input type="email" id="nl-email" placeholder="E-mail" required>
+                    <input type="tel" id="nl-whatsapp" placeholder="WhatsApp">
+                    <button type="submit" id="nl-submit">Inscrever-se</button>
+                    <p id="nl-status" style="margin-top: 10px; font-size: 0.9rem; font-weight: 600; text-align: center;"></p>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container" style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+            <img src="assets/logo-xama.png" alt="Xamã Comunicação" width="110" style="margin-bottom: 15px;">
+            <p style="margin: 0;">PróKit ®<br><a href="/admin.html" style="color: #666; text-decoration: none; font-size: 0.8rem; margin-top: 5px; display: inline-block; transition: color 0.3s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#666'">Admin</a></p>
+        </div>
+    </footer>
+
+    <!-- GSAP / Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="js/animations.js"></script>
+    <script>
+        document.getElementById('newsletter-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = document.getElementById('nl-submit');
+            const statusMsg = document.getElementById('nl-status');
+            const name = document.getElementById('nl-name').value;
+            const email = document.getElementById('nl-email').value;
+            const whatsapp = document.getElementById('nl-whatsapp').value;
+            
+            btn.disabled = true;
+            btn.innerText = 'ENVIANDO...';
+            statusMsg.innerText = '';
+            
+            try {
+                const res = await fetch('/api/subscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, whatsapp })
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    statusMsg.innerText = 'Inscrição realizada com sucesso!';
+                    statusMsg.style.color = '#4CAF50';
+                    document.getElementById('newsletter-form').reset();
+                } else {
+                    statusMsg.innerText = data.error || 'Erro ao se inscrever.';
+                    statusMsg.style.color = 'red';
+                }
+            } catch (err) {
+                statusMsg.innerText = 'Erro de conexão. Tente novamente mais tarde.';
+                statusMsg.style.color = 'red';
+            }
+            
+            btn.disabled = false;
+            btn.innerText = 'Inscrever-se';
+        });
+
+        // Carregar Agenda Dinamicamente
+        async function loadPublicAgenda() {
+            try {
+                const res = await fetch('/api/agenda');
+                const data = await res.json();
+                const container = document.getElementById('dynamic-agenda-container');
+                
+                if (data.agenda && data.agenda.length > 0) {
+                    container.innerHTML = data.agenda.map(item => `
+                        <div class="date-row">
+                            <div class="date-event">${item.event}</div>
+                            <div class="date-city">${item.city}</div>
+                            <div class="date-time">${item.date}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = '<div style="text-align: center; padding: 20px; color: #888;">Nenhuma data confirmada no momento.</div>';
+                }
+            } catch (err) {
+                console.error('Erro ao carregar agenda', err);
+            }
+        }
+
+        // Carregar Vídeos Dinamicamente
+        async function loadPublicVideos() {
+            try {
+                const res = await fetch('/api/videos');
+                const data = await res.json();
+                const container = document.getElementById('dynamic-video-grid');
+                
+                if (data.videos && data.videos.length > 0) {
+                    const highlight = data.videos.find(v => v.type === 'highlight');
+                    const secondaries = data.videos.filter(v => v.type === 'secondary');
+                    
+                    let html = '';
+                    
+                    if (highlight) {
+                        html += `
+                        <div class="video-highlight">
+                            <iframe width="100%" height="450" src="${highlight.url}" frameborder="0" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>`;
+                    }
+                    
+                    if (secondaries.length > 0) {
+                        html += '<div class="secondary-videos">';
+                        secondaries.forEach(vid => {
+                            html += `<iframe src="${vid.url}" frameborder="0" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
+                        });
+                        html += '</div>';
+                    }
+                    
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<div style="text-align: center; padding: 20px; color: #888; grid-column: 1 / -1;">Nenhum vídeo disponível no momento.</div>';
+                }
+            } catch (err) {
+                console.error('Erro ao carregar vídeos', err);
+            }
+        }
+
+        // Carregar Configurações (Bio e Instagram) Dinamicamente
+        async function loadPublicSettings() {
+            try {
+                const res = await fetch('/api/settings');
+                const data = await res.json();
+                
+                if (data.settings) {
+                    // Atualizar Bios
+                    if (data.settings.bio_pt) document.getElementById('bio-pt').innerHTML = data.settings.bio_pt;
+                    if (data.settings.bio_en) document.getElementById('bio-en').innerHTML = data.settings.bio_en;
+                    if (data.settings.bio_es) document.getElementById('bio-es').innerHTML = data.settings.bio_es;
+
+                    // Atualizar Instagram
+                    if (data.settings.instagram_url) {
+                        let instaUrl = data.settings.instagram_url.trim();
+                        // Remover queries para o permalink limpo
+                        if (instaUrl.includes('?')) instaUrl = instaUrl.split('?')[0];
+                        if (!instaUrl.endsWith('/')) instaUrl += '/';
+
+                        // Usar iframe com /embed/captioned/ que é mais estável para injeção dinâmica
+                        document.getElementById('dynamic-instagram-container').innerHTML = `
+                            <iframe src="${instaUrl}embed/captioned/" allowtransparency="true" allowfullscreen="true" frameborder="0" scrolling="no" style="background: white; max-width: 540px; width: 100%; height: 850px; border-radius: 12px; border: 1px solid rgb(219, 219, 219); box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: block; margin: 0 auto; min-width: 326px; padding: 0px;"></iframe>
+                        `;
+
+                        document.getElementById('instagram').style.display = 'block';
+                    }
+                }
+            } catch (err) {
+                console.error('Erro ao carregar configurações', err);
+            }
+        }
+
+        // Inicializar chamadas ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPublicAgenda();
+            loadPublicVideos();
+            loadPublicSettings();
+        });
+    </script>
+</body>
+</html>

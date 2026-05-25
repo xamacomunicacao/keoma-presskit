@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keoma - Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --text-color: #f0f0f0;
+            --accent-color: #3a3a3a;
+            --primary: #5a5a5a;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* LOGIN SCREEN */
+        #login-screen {
+            background: rgba(20, 20, 20, 0.8);
+            padding: 40px;
+            border-radius: 10px;
+            border: 1px solid var(--accent-color);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        #login-screen input {
+            width: 100%;
+            padding: 15px;
+            margin: 15px 0;
+            background: transparent;
+            border: 1px solid var(--accent-color);
+            color: #fff;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #fff;
+            color: #000;
+            border: none;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: #ccc;
+        }
+
+        /* DASHBOARD SCREEN */
+        #dashboard-screen {
+            display: none;
+            width: 100%;
+            max-width: 800px;
+            padding: 40px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--accent-color);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stats-card {
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid var(--accent-color);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .stats-card h2 { margin: 0; font-size: 3rem; font-weight: 800; }
+        .stats-card p { margin: 5px 0 0; color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 0.9rem; }
+
+        .compose-section {
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid var(--accent-color);
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        .compose-section input, .compose-section textarea {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #111;
+            border: 1px solid var(--accent-color);
+            color: #fff;
+            border-radius: 5px;
+            font-family: 'Montserrat', sans-serif;
+            box-sizing: border-box;
+        }
+
+        .compose-section textarea {
+            min-height: 200px;
+            resize: vertical;
+        }
+
+        #status-msg {
+            margin-top: 15px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 40px;
+        }
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid var(--accent-color);
+        }
+        th { color: #888; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; }
+
+    </style>
+</head>
+<body>
+
+    <!-- TELA DE LOGIN -->
+    <div id="login-screen">
+        <h2>Área Restrita</h2>
+        <p style="color: #888; font-size: 0.9rem;">Insira a senha do artista para acessar.</p>
+        <input type="password" id="admin-password" placeholder="Senha">
+        <button onclick="login()" style="margin-bottom: 10px;">ENTRAR</button>
+        <button onclick="window.location.href='/'" style="background: transparent; border: 1px solid var(--primary); color: #fff;">VOLTAR PARA A HOME</button>
+        <p id="login-error" style="color: red; display: none; margin-top: 15px; font-size: 0.9rem;">Senha incorreta.</p>
+    </div>
+
+    <!-- TELA DO PAINEL -->
+    <div id="dashboard-screen">
+        <div class="header">
+            <h2>KEOMA | Painel</h2>
+            <button onclick="logout()" style="width: auto; padding: 10px 20px; font-size: 0.8rem;">SAIR</button>
+        </div>
+
+        <div class="stats-card">
+            <h2 id="total-subscribers">0</h2>
+            <p>Fãs na Lista VIP</p>
+        </div>
+
+        <div class="compose-section">
+            <h3 style="margin-top: 0;">Disparar Newsletter (E-mail)</h3>
+            <input type="text" id="email-subject" placeholder="Assunto do E-mail (ex: Nova Tour 2026)">
+            <textarea id="email-body" placeholder="Escreva sua mensagem aqui... Você pode usar HTML básico como <strong>negrito</strong> ou <br> para pular linha."></textarea>
+            <button onclick="sendBroadcast()" id="send-btn"><i class="fa-solid fa-paper-plane"></i> ENVIAR PARA TODOS</button>
+            <p id="status-msg"></p>
+        </div>
+
+        <div class="compose-section" style="margin-top: 30px;">
+            <h3 style="margin-top: 0;">Gerenciar Agenda</h3>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                <input type="text" id="agenda-event" placeholder="Evento (ex: Tour)" style="flex: 1; margin-bottom: 0;">
+                <input type="text" id="agenda-city" placeholder="Cidade (ex: Peru 🇵🇪)" style="flex: 1; margin-bottom: 0;" list="city-list">
+                <datalist id="city-list"></datalist>
+                <input type="date" id="agenda-date" style="flex: 1; margin-bottom: 0; padding: 15px; background: #111; border: 1px solid var(--accent-color); color: #fff; border-radius: 5px; font-family: 'Montserrat', sans-serif; color-scheme: dark;">
+            </div>
+            <button onclick="addAgenda()" id="btn-add-agenda" style="width: auto; padding: 10px 20px; font-size: 0.8rem;"><i class="fa-solid fa-plus"></i> Adicionar Data</button>
+            <p id="agenda-status-msg" style="margin-top: 15px; font-weight: 600;"></p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Evento</th>
+                        <th>Cidade</th>
+                        <th>Data</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="agenda-table">
+                    <!-- Preenchido via JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="compose-section" style="margin-top: 30px; margin-bottom: 30px;">
+            <h3 style="margin-top: 0;">Gerenciar Vídeos (YouTube)</h3>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                <input type="text" id="video-url" placeholder="Link Embed (ex: https://www.youtube.com/embed/...)" style="flex: 2; margin-bottom: 0;">
+                <select id="video-type" style="flex: 1; margin-bottom: 0; padding: 15px; background: #111; border: 1px solid var(--accent-color); color: #fff; border-radius: 5px; font-family: 'Montserrat', sans-serif;">
+                    <option value="highlight">Destaque (Vídeo Maior)</option>
+                    <option value="secondary">Secundário (Vídeos Menores)</option>
+                </select>
+            </div>
+            <button onclick="addVideo()" id="btn-add-video" style="width: auto; padding: 10px 20px; font-size: 0.8rem;"><i class="fa-solid fa-plus"></i> Adicionar Vídeo</button>
+            <p id="video-status-msg" style="margin-top: 15px; font-weight: 600;"></p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Link</th>
+                        <th>Tipo</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="videos-table">
+                    <!-- Preenchido via JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="compose-section" style="margin-top: 30px;">
+            <h3 style="margin-top: 0;">Gerenciar Biografia</h3>
+            <div style="margin-bottom: 20px;">
+                <label style="color: #888; font-size: 0.8rem; text-transform: uppercase;">Biografia (Em Português)</label>
+                <textarea id="bio-pt" placeholder="Sua bio em português... As traduções para Inglês e Espanhol serão geradas automaticamente!" style="min-height: 150px;"></textarea>
+            </div>
+            <button onclick="saveBioSettings()" id="btn-save-bio" style="width: auto; padding: 10px 20px; font-size: 0.8rem;"><i class="fa-solid fa-language"></i> Salvar e Traduzir Automaticamente</button>
+            <p id="bio-status-msg" style="margin-top: 15px; font-weight: 600;"></p>
+        </div>
+
+        <div class="compose-section" style="margin-top: 30px; margin-bottom: 30px;">
+            <h3 style="margin-top: 0;">Gerenciar Destaque do Instagram</h3>
+            <div style="margin-bottom: 20px;">
+                <label style="color: #888; font-size: 0.8rem; text-transform: uppercase;">Link do Post</label>
+                <input type="text" id="instagram-url" placeholder="Ex: https://www.instagram.com/p/C_dJfiIpEW9/?img_index=1" style="margin-bottom: 0;">
+                <p style="color: #666; font-size: 0.8rem; margin-top: 5px;">Cole o link completo da foto ou vídeo do Instagram.</p>
+            </div>
+            <button onclick="saveInstagramSettings()" id="btn-save-instagram" style="width: auto; padding: 10px 20px; font-size: 0.8rem;"><i class="fa-solid fa-save"></i> Salvar Link do Instagram</button>
+            <p id="instagram-status-msg" style="margin-top: 15px; font-weight: 600;"></p>
+        </div>
+
+        <h3>Últimos Inscritos</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>E-mail</th>
+                    <th>WhatsApp</th>
+                </tr>
+            </thead>
+            <tbody id="subscribers-table">
+                <!-- Preenchido via JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let token = localStorage.getItem('keoma_admin_token');
+        
+        if (token) {
+            showDashboard();
+            loadSubscribers();
+            loadAgenda();
+            loadVideos();
+            loadSettings();
+        }
+
+        async function login() {
+            const password = document.getElementById('admin-password').value;
+            try {
+                const res = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    token = data.token;
+                    localStorage.setItem('keoma_admin_token', token);
+                    document.getElementById('login-error').style.display = 'none';
+                    showDashboard();
+                    loadSubscribers();
+                    loadAgenda();
+                    loadVideos();
+                    loadSettings();
+                } else {
+                    document.getElementById('login-error').style.display = 'block';
+                }
+            } catch (err) {
+                alert('Erro ao conectar ao servidor.');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('keoma_admin_token');
+            token = null;
+            window.location.href = '/';
+        }
+
+        function showDashboard() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('dashboard-screen').style.display = 'block';
+        }
+
+        async function loadSubscribers() {
+            try {
+                const res = await fetch('/api/admin/subscribers', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (res.status === 401) {
+                    logout();
+                    return;
+                }
+                
+                const data = await res.json();
+                
+                document.getElementById('total-subscribers').innerText = data.subscribers.length;
+                
+                const tbody = document.getElementById('subscribers-table');
+                tbody.innerHTML = '';
+                
+                data.subscribers.slice(0, 10).forEach(sub => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${sub.name}</td>
+                            <td>${sub.email}</td>
+                            <td>${sub.whatsapp || '-'}</td>
+                        </tr>
+                    `;
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function sendBroadcast() {
+            const subject = document.getElementById('email-subject').value;
+            const messageHtml = document.getElementById('email-body').value;
+            const btn = document.getElementById('send-btn');
+            const statusMsg = document.getElementById('status-msg');
+
+            if (!subject || !messageHtml) {
+                statusMsg.innerText = 'Preencha o assunto e a mensagem!';
+                statusMsg.style.color = 'red';
+                return;
+            }
+
+            if (!confirm('Tem certeza que deseja disparar este e-mail para TODOS os inscritos?')) return;
+
+            btn.disabled = true;
+            btn.innerText = 'ENVIANDO...';
+            statusMsg.innerText = '';
+
+            try {
+                const res = await fetch('/api/admin/broadcast', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ subject, messageHtml })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    statusMsg.innerText = `Enviado com sucesso! (${data.successCount} enviados, ${data.failCount} falhas)`;
+                    statusMsg.style.color = '#4CAF50';
+                    document.getElementById('email-subject').value = '';
+                    document.getElementById('email-body').value = '';
+                } else {
+                    statusMsg.innerText = 'Erro: ' + data.error;
+                    statusMsg.style.color = 'red';
+                }
+            } catch (err) {
+                statusMsg.innerText = 'Erro de conexão.';
+                statusMsg.style.color = 'red';
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> ENVIAR PARA TODOS';
+        }
+
+        // ===================================
+        // AGENDA FUNCTIONS
+        // ===================================
+        async function loadAgenda() {
+            try {
+                const res = await fetch('/api/agenda');
+                const data = await res.json();
+                
+                const tbody = document.getElementById('agenda-table');
+                tbody.innerHTML = '';
+                
+                data.agenda.forEach(item => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${item.event}</td>
+                            <td>${item.city}</td>
+                            <td>${item.date}</td>
+                            <td><button onclick="deleteAgenda(${item.id})" style="width: auto; padding: 5px 10px; background: red; color: white; font-size: 0.7rem;"><i class="fa-solid fa-trash"></i> Excluir</button></td>
+                        </tr>
+                    `;
+                });
+
+                // Preencher o datalist de cidades com as cidades existentes
+                const datalist = document.getElementById('city-list');
+                const uniqueCities = [...new Set(data.agenda.map(i => i.city))];
+                datalist.innerHTML = uniqueCities.map(c => `<option value="${c}">`).join('');
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function addAgenda() {
+            const event = document.getElementById('agenda-event').value;
+            const city = document.getElementById('agenda-city').value;
+            let date = document.getElementById('agenda-date').value;
+            const statusMsg = document.getElementById('agenda-status-msg');
+
+            if (!event || !city || !date) {
+                statusMsg.innerText = 'Preencha todos os campos!';
+                statusMsg.style.color = 'red';
+                return;
+            }
+
+            // Converter data de YYYY-MM-DD para DD/MM
+            if (date.includes('-')) {
+                const parts = date.split('-');
+                date = `${parts[2]}/${parts[1]}`;
+            }
+
+            try {
+                const res = await fetch('/api/admin/agenda', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ event, city, date })
+                });
+
+                if (res.ok) {
+                    statusMsg.innerText = 'Adicionado com sucesso!';
+                    statusMsg.style.color = '#4CAF50';
+                    document.getElementById('agenda-event').value = '';
+                    document.getElementById('agenda-city').value = '';
+                    document.getElementById('agenda-date').value = '';
+                    loadAgenda();
+                } else {
+                    statusMsg.innerText = 'Erro ao adicionar.';
+                    statusMsg.style.color = 'red';
+                }
+            } catch (err) {
+                statusMsg.innerText = 'Erro de conexão.';
+                statusMsg.style.color = 'red';
+            }
+        }
+
+        async function deleteAgenda(id) {
+            if (!confirm('Tem certeza que deseja excluir esta data?')) return;
+            try {
+                const res = await fetch(`/api/admin/agenda/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    loadAgenda();
+                }
+            } catch (err) {
+                alert('Erro ao excluir data.');
+            }
+        }
+
+        // ===================================
+        // VIDEO FUNCTIONS
+        // ===================================
+        async function loadVideos() {
+            try {
+                const res = await fetch('/api/videos');
+                const data = await res.json();
+                
+                const tbody = document.getElementById('videos-table');
+                tbody.innerHTML = '';
+                
+                data.videos.forEach(item => {
+                    const typeStr = item.type === 'highlight' ? 'Destaque' : 'Secundário';
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.url}">${item.url}</td>
+                            <td>${typeStr}</td>
+                            <td><button onclick="deleteVideo(${item.id})" style="width: auto; padding: 5px 10px; background: red; color: white; font-size: 0.7rem;"><i class="fa-solid fa-trash"></i> Excluir</button></td>
+                        </tr>
+                    `;
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function addVideo() {
+            const url = document.getElementById('video-url').value;
+            const type = document.getElementById('video-type').value;
+            const statusMsg = document.getElementById('video-status-msg');
+
+            if (!url) {
+                statusMsg.innerText = 'Preencha o link do vídeo!';
+                statusMsg.style.color = 'red';
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/admin/videos', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ url, type })
+                });
+
+                if (res.ok) {
+                    statusMsg.innerText = 'Adicionado com sucesso!';
+                    statusMsg.style.color = '#4CAF50';
+                    document.getElementById('video-url').value = '';
+                    loadVideos();
+                } else {
+                    statusMsg.innerText = 'Erro ao adicionar.';
+                    statusMsg.style.color = 'red';
+                }
+            } catch (err) {
+                statusMsg.innerText = 'Erro de conexão.';
+                statusMsg.style.color = 'red';
+            }
+        }
+
+        async function deleteVideo(id) {
+            if (!confirm('Tem certeza que deseja excluir este vídeo?')) return;
+            try {
+                const res = await fetch(`/api/admin/videos/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    loadVideos();
+                }
+            } catch (err) {
+                alert('Erro ao excluir vídeo.');
+            }
+        }
+
+        // ===================================
+        // SETTINGS FUNCTIONS
+        // ===================================
+        async function loadSettings() {
+            try {
+                const res = await fetch('/api/settings');
+                const data = await res.json();
+                
+                if (data.settings) {
+                    if (data.settings.bio_pt) document.getElementById('bio-pt').value = data.settings.bio_pt;
+                    if (data.settings.instagram_url) document.getElementById('instagram-url').value = data.settings.instagram_url;
+                }
+            } catch (err) {
+                console.error('Erro ao carregar configurações', err);
+            }
+        }
+
+        async function translateText(text, targetLang) {
+            if (!text) return '';
+            try {
+                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=pt&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
+                const res = await fetch(url);
+                const data = await res.json();
+                return data[0].map(item => item[0]).join('');
+            } catch (e) {
+                console.error('Erro de tradução:', e);
+                return text; // Fallback
+            }
+        }
+
+        async function saveBioSettings() {
+            const bio_pt = document.getElementById('bio-pt').value;
+            const statusMsg = document.getElementById('bio-status-msg');
+
+            const btn = document.getElementById('btn-save-bio');
+            btn.disabled = true;
+            btn.innerText = 'TRADUZINDO E SALVANDO...';
+            statusMsg.innerText = '';
+            statusMsg.style.color = '#fff';
+
+            try {
+                // Fazer traduções automáticas
+                statusMsg.innerText = 'Gerando tradução para o Inglês...';
+                const bio_en = await translateText(bio_pt, 'en');
+                
+                statusMsg.innerText = 'Gerando tradução para o Espanhol...';
+                const bio_es = await translateText(bio_pt, 'es');
+
+                statusMsg.innerText = 'Salvando dados no servidor...';
+                const res = await fetch('/api/admin/settings', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ bio_pt, bio_en, bio_es })
+                });
+
+                if (res.ok) {
+                    statusMsg.innerText = 'Biografia salva com sucesso!';
+                    statusMsg.style.color = '#4CAF50';
+                } else {
+                    statusMsg.innerText = 'Erro ao salvar biografia.';
+                    statusMsg.style.color = 'red';
+                }
+            } catch (err) {
+                statusMsg.innerText = 'Erro de conexão.';
+                statusMsg.style.color = 'red';
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-language"></i> Salvar e Traduzir Automaticamente';
+        }
+
+        async function saveInstagramSettings() {
+            const instagram_url = document.getElementById('instagram-url').value;
+            const statusMsg = document.getElementById('instagram-status-msg');
+
+            const btn = document.getElementById('btn-save-instagram');
+            btn.disabled = true;
+            btn.innerText = 'SALVANDO...';
+            statusMsg.innerText = '';
+            statusMsg.style.color = '#fff';
+
+            try {
+                const res = await fetch('/api/admin/settings', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ instagram_url })
+                });
+
+                if (res.ok) {
+                    statusMsg.innerText = 'Link salvo com sucesso!';
+                    statusMsg.style.color = '#4CAF50';
+                } else {
+                    statusMsg.innerText = 'Erro ao salvar link.';
+                    statusMsg.style.color = 'red';
+                }
+            } catch (err) {
+                statusMsg.innerText = 'Erro de conexão.';
+                statusMsg.style.color = 'red';
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-save"></i> Salvar Link do Instagram';
+        }
+    </script>
+</body>
+</html>

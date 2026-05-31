@@ -509,6 +509,7 @@
             let url = document.getElementById('video-url').value;
             const type = document.getElementById('video-type').value;
             const statusMsg = document.getElementById('video-status-msg');
+            const btn = document.getElementById('btn-add-video');
 
             if (!url) {
                 statusMsg.innerText = 'Preencha o link do vídeo!';
@@ -517,17 +518,51 @@
             }
 
             // Converter link comum do YouTube para embed automaticamente
-            let videoId = '';
-            if (url.includes('youtube.com/watch?v=')) {
-                videoId = url.split('v=')[1].split('&')[0];
-            } else if (url.includes('youtu.be/')) {
-                videoId = url.split('youtu.be/')[1].split('?')[0];
-            } else if (url.includes('youtube.com/shorts/')) {
-                videoId = url.split('shorts/')[1].split('?')[0];
+            const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/ ]{11})/i;
+            const match = url.match(regExp);
+            if (match && match[1].length === 11) {
+                url = 'https://www.youtube.com/embed/' + match[1];
             }
-            
-            if (videoId) {
-                url = 'https://www.youtube.com/embed/' + videoId;
+
+            btn.disabled = true;
+            statusMsg.innerText = 'Processando...';
+            statusMsg.style.color = '#fff';
+
+            // Se for do tipo highlight, verificar se já existe um destaque
+            if (type === 'highlight') {
+                try {
+                    const resVideos = await fetch('/api/videos');
+                    const dataVideos = await resVideos.json();
+                    const existingHighlight = dataVideos.videos.find(v => v.type === 'highlight');
+                    
+                    if (existingHighlight) {
+                        const replace = confirm('Já existe um vídeo de destaque (primário) cadastrado. Deseja substituí-lo por este novo vídeo?');
+                        if (!replace) {
+                            btn.disabled = false;
+                            statusMsg.innerText = '';
+                            return;
+                        }
+                        
+                        // Excluir o destaque anterior
+                        const delRes = await fetch(`/api/admin/videos/${existingHighlight.id}`, {
+                            method: 'DELETE',
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        
+                        if (!delRes.ok) {
+                            statusMsg.innerText = 'Erro ao remover o destaque anterior.';
+                            statusMsg.style.color = 'red';
+                            btn.disabled = false;
+                            return;
+                        }
+                    }
+                } catch (err) {
+                    console.error(err);
+                    statusMsg.innerText = 'Erro ao verificar vídeos existentes.';
+                    statusMsg.style.color = 'red';
+                    btn.disabled = false;
+                    return;
+                }
             }
 
             try {
@@ -552,6 +587,8 @@
             } catch (err) {
                 statusMsg.innerText = 'Erro de conexão.';
                 statusMsg.style.color = 'red';
+            } finally {
+                btn.disabled = false;
             }
         }
 
@@ -645,10 +682,16 @@
         }
 
         async function saveInstagramSettings() {
-            const instagram_url = document.getElementById('instagram-url').value;
+            const instagram_url = document.getElementById('instagram-url').value.trim();
             const statusMsg = document.getElementById('instagram-status-msg');
-
             const btn = document.getElementById('btn-save-instagram');
+
+            if (instagram_url && !instagram_url.includes('/p/') && !instagram_url.includes('/reel/') && !instagram_url.includes('/tv/')) {
+                statusMsg.innerText = 'Por favor, insira o link de um POST (foto ou vídeo), e não o link do perfil.';
+                statusMsg.style.color = 'red';
+                return;
+            }
+
             btn.disabled = true;
             btn.innerText = 'SALVANDO...';
             statusMsg.innerText = '';

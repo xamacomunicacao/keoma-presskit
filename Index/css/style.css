@@ -38,6 +38,7 @@ body {
     text-transform: uppercase;
     letter-spacing: 2px;
     text-align: center;
+    text-indent: 2px; /* Compensar o letter-spacing no final */
 }
 
 .divider {
@@ -199,6 +200,10 @@ body {
 }
 
 /* Media Section */
+#tracks .section-title {
+    padding-right: 48px; /* Ajuste óptico para compensar a diferença de tamanho entre "MÚSICAS" e "SHOWS" */
+}
+
 .video-grid {
     margin-bottom: 50px;
 }
@@ -352,6 +357,10 @@ footer img {
     
     .section-title {
         font-size: 1.6rem;
+    }
+    
+    #tracks .section-title {
+        padding-right: 30px; /* Ajuste óptico móvel para compensar a diferença de tamanho de palavras */
     }
     
     .date-header, .date-row {

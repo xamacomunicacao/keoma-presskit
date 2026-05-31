@@ -506,7 +506,7 @@
         }
 
         async function addVideo() {
-            const url = document.getElementById('video-url').value;
+            let url = document.getElementById('video-url').value;
             const type = document.getElementById('video-type').value;
             const statusMsg = document.getElementById('video-status-msg');
 
@@ -514,6 +514,20 @@
                 statusMsg.innerText = 'Preencha o link do vídeo!';
                 statusMsg.style.color = 'red';
                 return;
+            }
+
+            // Converter link comum do YouTube para embed automaticamente
+            let videoId = '';
+            if (url.includes('youtube.com/watch?v=')) {
+                videoId = url.split('v=')[1].split('&')[0];
+            } else if (url.includes('youtu.be/')) {
+                videoId = url.split('youtu.be/')[1].split('?')[0];
+            } else if (url.includes('youtube.com/shorts/')) {
+                videoId = url.split('shorts/')[1].split('?')[0];
+            }
+            
+            if (videoId) {
+                url = 'https://www.youtube.com/embed/' + videoId;
             }
 
             try {

@@ -144,7 +144,7 @@
     <div id="login-screen">
         <h2>Área Restrita</h2>
         <p style="color: #888; font-size: 0.9rem;">Insira a senha do artista para acessar.</p>
-        <input type="password" id="admin-password" placeholder="Senha">
+        <input type="password" id="admin-password" placeholder="Senha" onkeypress="if(event.key === 'Enter') login()">
         <button onclick="login()" style="margin-bottom: 10px;">ENTRAR</button>
         <button onclick="window.location.href='/'" style="background: transparent; border: 1px solid var(--primary); color: #fff;">VOLTAR PARA A HOME</button>
         <p id="login-error" style="color: red; display: none; margin-top: 15px; font-size: 0.9rem;">Senha incorreta.</p>

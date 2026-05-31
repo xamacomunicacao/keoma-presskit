@@ -32,3 +32,5 @@ Vídeos/NEW ID 2026 - KEOMA (1).mov
 # Databases
 *.sqlite
 *.db
+
+.vercel

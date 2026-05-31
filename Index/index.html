@@ -8,14 +8,23 @@
     <link rel="stylesheet" href="css/style.css?v=1.1">
     <style>
         #tracks .section-title {
-            position: relative !important;
-            left: -24px !important;
-            text-indent: 2px !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            gap: 12px !important;
         }
-        @media (max-width: 768px) {
-            #tracks .section-title {
-                left: -15px !important;
-            }
+        #tracks .section-title .title-left,
+        #tracks .section-title .title-right {
+            flex: 1 !important;
+        }
+        #tracks .section-title .title-left {
+            text-align: right !important;
+        }
+        #tracks .section-title .title-right {
+            text-align: left !important;
+        }
+        #tracks .section-title .title-center {
+            flex-grow: 0 !important;
         }
     </style>
     
@@ -83,7 +92,7 @@
     <!-- Media Section -->
     <section class="media-section section-padding" id="tracks">
         <div class="container">
-            <h2 class="section-title">MÚSICAS E SHOWS</h2>
+            <h2 class="section-title"><span class="title-left">MÚSICAS</span><span class="title-center">E</span><span class="title-right">SHOWS</span></h2>
             <div class="divider"></div>
             
             <div class="video-grid" id="dynamic-video-grid">

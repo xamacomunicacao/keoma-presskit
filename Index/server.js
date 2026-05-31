@@ -6,9 +6,11 @@ const { Resend } = require('resend');
 
 const app = express();
 const port = process.env.PORT || 3000;
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Inicializa o Resend de forma segura para não travar o servidor se a chave faltar
+const resendApiKey = process.env.RESEND_API_KEY || 're_placeholder_123';
+const resend = new Resend(resendApiKey);
 
-// Inicializa o Supabase (garanta que as variáveis estejam no .env ou Vercel)
+// Inicializa o Supabase
 const supabase = createClient(
   process.env.SUPABASE_URL || 'https://placeholder.supabase.co',
   process.env.SUPABASE_ANON_KEY || 'placeholder'

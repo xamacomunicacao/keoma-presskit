@@ -53,11 +53,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const images = [];
         const frames = { frame: 0 };
 
-        for (let i = 0; i < frameCount; i++) {
-            const img = new Image();
-            img.src = currentFrame(i);
-            images.push(img);
-        }
+        // Carrega o frame inicial com prioridade máxima para exibir na tela o mais rápido possível
+        const firstImg = new Image();
+        firstImg.src = currentFrame(0);
+        images.push(firstImg);
+
+        // Carrega os outros 96 frames em segundo plano após um pequeno delay de 150ms
+        // Isso evita congestionar a rede e permite que a imagem do artista apareça instantaneamente
+        setTimeout(() => {
+            for (let i = 1; i < frameCount; i++) {
+                const img = new Image();
+                img.src = currentFrame(i);
+                images.push(img);
+            }
+        }, 150);
 
         // Canvas auxiliar para amostrar cor de borda
         const sampleCanvas = document.createElement('canvas');
@@ -100,7 +109,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return `rgb(${Math.round(r/n)}, ${Math.round(g/n)}, ${Math.round(b/n)})`;
         }
 
-        images[0].onload = render;
+        if (firstImg.complete) {
+            render();
+        } else {
+            firstImg.onload = render;
+        }
 
         function render() {
             if (images[frames.frame]) {

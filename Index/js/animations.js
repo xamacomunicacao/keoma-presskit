@@ -53,18 +53,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const images = [];
         const frames = { frame: 0 };
 
-        // Carrega o frame inicial com prioridade máxima para exibir na tela o mais rápido possível
-        const firstImg = new Image();
+        // Inicializa o array com objetos Image correspondentes a cada frame para manter consistência de indexação
+        for (let i = 0; i < frameCount; i++) {
+            images.push(new Image());
+        }
+
+        // Carrega o frame inicial com prioridade máxima
+        const firstImg = images[0];
         firstImg.src = currentFrame(0);
-        images.push(firstImg);
 
         // Carrega os outros 96 frames em segundo plano após um pequeno delay de 150ms
         // Isso evita congestionar a rede e permite que a imagem do artista apareça instantaneamente
         setTimeout(() => {
             for (let i = 1; i < frameCount; i++) {
-                const img = new Image();
-                img.src = currentFrame(i);
-                images.push(img);
+                images[i].src = currentFrame(i);
             }
         }, 150);
 
@@ -115,8 +117,15 @@ document.addEventListener('DOMContentLoaded', () => {
             firstImg.onload = render;
         }
 
+        let lastRenderedFrame = -1;
+
         function render() {
-            if (images[frames.frame]) {
+            const targetFrame = frames.frame;
+            const targetImg = images[targetFrame];
+
+            // Só atualiza o canvas se a imagem do frame correspondente estiver totalmente carregada
+            // Isso evita a renderização de frames em branco/pretos (piscadas) quando a rede está lenta
+            if (targetImg && targetImg.complete && targetImg.naturalWidth !== 0) {
                 const w = canvas.width;
                 const h = canvas.height;
                 
@@ -126,20 +135,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Estende os pixels da borda esquerda do vídeo para a esquerda
                 // Pega uma faixa de 2px da borda e estica para preencher
                 context.drawImage(
-                    images[frames.frame],
+                    targetImg,
                     0, 0, 2, imgH,           // source: 2px da borda esquerda
                     0, 0, offsetX + 2, imgH   // destination: estica até a posição do vídeo
                 );
                 
                 // Estende os pixels da borda direita do vídeo para a direita
                 context.drawImage(
-                    images[frames.frame],
+                    targetImg,
                     imgW - 2, 0, 2, imgH,                    // source: 2px da borda direita
                     offsetX + imgW - 2, 0, offsetX + 2, imgH  // destination: estica até o fim
                 );
                 
                 // Desenha o frame centralizado sobre as extensões
-                context.drawImage(images[frames.frame], offsetX, 0, imgW, imgH);
+                context.drawImage(targetImg, offsetX, 0, imgW, imgH);
                 
                 // Máscara lateral — só aplica em telas largas (desktop)
                 if (window.innerWidth > 768) {
@@ -169,6 +178,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Restaura composição padrão
                 context.globalCompositeOperation = 'source-over';
+                lastRenderedFrame = targetFrame;
+            } else {
+                // Se o frame atual não está pronto e nunca desenhamos nada antes,
+                // tenta exibir o primeiro frame (se estiver disponível)
+                if (lastRenderedFrame === -1 && images[0] && images[0].complete && images[0].naturalWidth !== 0) {
+                    const w = canvas.width;
+                    const h = canvas.height;
+                    context.clearRect(0, 0, w, h);
+                    context.drawImage(images[0], offsetX, 0, imgW, imgH);
+                    lastRenderedFrame = 0;
+                }
             }
         }
 

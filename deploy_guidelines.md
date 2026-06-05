@@ -37,3 +37,7 @@ Este documento estabelece o **modus operandi** obrigatório para qualquer altera
 ### 5. Validação de Execução Local
 * **Regra**: Sempre inicialize o servidor local e verifique a ausência de erros no console do terminal antes de consolidar e enviar as modificações.
 * **Deploy**: Commits explicativos padronizados e push direto para a branch de produção via Git, monitorando a build.
+
+### 6. Comunicação de Modificações Enxuta (Economia de Tokens)
+* **Regra**: Em relatórios de modificações cotidianas (não deploys iniciais), o feedback final para o usuário deve ser condensado em um checklist minimalista e objetivo, sem transcrições longas de logs ou explicações repetitivas.
+

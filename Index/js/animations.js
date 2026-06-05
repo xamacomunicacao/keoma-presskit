@@ -111,13 +111,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return `rgb(${Math.round(r/n)}, ${Math.round(g/n)}, ${Math.round(b/n)})`;
         }
 
+        let lastRenderedFrame = -1;
+
         if (firstImg.complete) {
             render();
         } else {
             firstImg.onload = render;
         }
-
-        let lastRenderedFrame = -1;
 
         function render() {
             const targetFrame = frames.frame;

@@ -369,4 +369,82 @@ footer img {
     }
 }
 
+/* Presskit Section */
+.presskit-section {
+    background: linear-gradient(180deg, var(--bg-color) 0%, rgba(255, 255, 255, 0.02) 50%, var(--bg-color) 100%);
+    text-align: center;
+}
+
+.presskit-text {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.presskit-text.hidden {
+    display: none;
+}
+
+.presskit-text p {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+}
+
+.presskit-action {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.presskit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 40px;
+    background: transparent;
+    color: var(--text-primary);
+    border: 2px solid var(--text-primary);
+    text-decoration: none;
+    border-radius: 40px;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+}
+
+.presskit-btn i {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.presskit-btn:hover {
+    background: var(--text-primary);
+    color: var(--bg-color);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(255, 255, 255, 0.15);
+}
+
+.presskit-btn:hover i {
+    transform: translateY(2px);
+}
+
+.presskit-btn:active {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 768px) {
+    .presskit-text p {
+        font-size: 1rem;
+        padding: 0 10px;
+    }
+    .presskit-btn {
+        padding: 14px 30px;
+        font-size: 0.9rem;
+    }
+}
+
 

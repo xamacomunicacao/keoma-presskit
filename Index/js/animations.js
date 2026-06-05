@@ -2,15 +2,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Language Tabs Logic
     const langBtns = document.querySelectorAll('.lang-btn');
     const bioContents = document.querySelectorAll('.bio-content');
+    const presskitContents = document.querySelectorAll('.presskit-text');
 
     langBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             langBtns.forEach(b => b.classList.remove('active'));
             bioContents.forEach(c => c.classList.add('hidden'));
+            presskitContents.forEach(c => c.classList.add('hidden'));
 
             btn.classList.add('active');
             const lang = btn.getAttribute('data-lang');
             document.getElementById(`bio-${lang}`).classList.remove('hidden');
+            
+            const presskitEl = document.getElementById(`presskit-${lang}`);
+            if (presskitEl) {
+                presskitEl.classList.remove('hidden');
+            }
         });
     });
 

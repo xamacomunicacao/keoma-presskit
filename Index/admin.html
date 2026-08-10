@@ -221,6 +221,32 @@
                 </tbody>
             </table>
         </div>
+        </div>
+
+        <div class="compose-section" style="margin-top: 30px;">
+            <h3 style="margin-top: 0;">Gerenciar Histórico de Eventos (Galeria)</h3>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                <input type="text" id="gallery-title" placeholder="Nome do Evento (ex: Tomorrowland)" style="flex: 1; margin-bottom: 0;">
+                <input type="text" id="gallery-location" placeholder="Local (ex: São Paulo, SP)" style="flex: 1; margin-bottom: 0;">
+                <input type="text" id="gallery-image" placeholder="URL da Imagem (ex: https://...)" style="flex: 2; margin-bottom: 0;">
+            </div>
+            <button onclick="addGallery()" id="btn-add-gallery" style="width: auto; padding: 10px 20px; font-size: 0.8rem;"><i class="fa-solid fa-plus"></i> Adicionar à Galeria</button>
+            <p id="gallery-status-msg" style="margin-top: 15px; font-weight: 600;"></p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Imagem</th>
+                        <th>Evento</th>
+                        <th>Local</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="gallery-table">
+                    <!-- Preenchido via JS -->
+                </tbody>
+            </table>
+        </div>
 
         <div class="compose-section" style="margin-top: 30px;">
             <h3 style="margin-top: 0;">Gerenciar Biografia</h3>
@@ -267,6 +293,7 @@
             loadAgenda();
             loadVideos();
             loadSettings();
+            loadGallery();
         }
 
         async function login() {
@@ -289,6 +316,7 @@
                     loadAgenda();
                     loadVideos();
                     loadSettings();
+                    loadGallery();
                 } else {
                     document.getElementById('login-error').style.display = 'block';
                 }
@@ -604,6 +632,97 @@
                 }
             } catch (err) {
                 alert('Erro ao excluir vídeo.');
+            }
+        }
+
+        // ===================================
+        // EVENT GALLERY FUNCTIONS
+        // ===================================
+        async function loadGallery() {
+            try {
+                const res = await fetch('/api/events_gallery');
+                const data = await res.json();
+                
+                const tbody = document.getElementById('gallery-table');
+                tbody.innerHTML = '';
+                
+                if (data.events && data.events.length > 0) {
+                    data.events.forEach(item => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td><img src="${item.image_url}" alt="thumb" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;"></td>
+                                <td>${item.title}</td>
+                                <td>${item.location}</td>
+                                <td><button onclick="deleteGallery('${item.id}')" style="width: auto; padding: 5px 10px; background: red; color: white; font-size: 0.7rem;"><i class="fa-solid fa-trash"></i> Excluir</button></td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #888;">Nenhum evento na galeria.</td></tr>';
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function addGallery() {
+            const title = document.getElementById('gallery-title').value;
+            const location = document.getElementById('gallery-location').value;
+            const image_url = document.getElementById('gallery-image').value;
+            const statusMsg = document.getElementById('gallery-status-msg');
+            const btn = document.getElementById('btn-add-gallery');
+
+            if (!title || !location || !image_url) {
+                statusMsg.innerText = 'Preencha todos os campos!';
+                statusMsg.style.color = 'red';
+                return;
+            }
+
+            btn.disabled = true;
+            statusMsg.innerText = 'Salvando...';
+            statusMsg.style.color = '#fff';
+
+            try {
+                const res = await fetch('/api/admin/events_gallery', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ title, location, image_url })
+                });
+
+                if (res.ok) {
+                    statusMsg.innerText = 'Adicionado com sucesso!';
+                    statusMsg.style.color = '#4CAF50';
+                    document.getElementById('gallery-title').value = '';
+                    document.getElementById('gallery-location').value = '';
+                    document.getElementById('gallery-image').value = '';
+                    loadGallery();
+                } else {
+                    statusMsg.innerText = 'Erro ao adicionar.';
+                    statusMsg.style.color = 'red';
+                }
+            } catch (err) {
+                statusMsg.innerText = 'Erro de conexão.';
+                statusMsg.style.color = 'red';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function deleteGallery(id) {
+            if (!confirm('Tem certeza que deseja excluir esta foto da galeria?')) return;
+            try {
+                const res = await fetch(`/api/admin/events_gallery/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    loadGallery();
+                }
+            } catch (err) {
+                alert('Erro ao excluir evento da galeria.');
             }
         }
 

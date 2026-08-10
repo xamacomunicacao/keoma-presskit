@@ -250,5 +250,44 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         });
+
+        // Event Gallery Reveal Animation (Surprise Box Effect)
+        const eventGallery = document.getElementById('events-gallery');
+        if (eventGallery) {
+            gsap.fromTo(eventGallery, 
+                { clipPath: "inset(15% 10% 15% 10% round 30px)", scale: 0.9, filter: "brightness(0.5)" },
+                { 
+                    clipPath: "inset(0% 0% 0% 0% round 0px)", 
+                    scale: 1,
+                    filter: "brightness(1)",
+                    ease: "power3.inOut",
+                    scrollTrigger: {
+                        trigger: eventGallery,
+                        start: "top 90%",
+                        end: "top 10%",
+                        scrub: 1
+                    }
+                }
+            );
+        }
+    }
+
+    // Event Gallery Search Logic
+    const searchInput = document.getElementById('event-search');
+    const eventCards = document.querySelectorAll('.event-card');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            eventCards.forEach(card => {
+                const title = card.getAttribute('data-title').toLowerCase();
+                if (title.includes(searchTerm)) {
+                    card.style.display = 'block';
+                    gsap.to(card, {opacity: 1, duration: 0.3});
+                } else {
+                    gsap.to(card, {opacity: 0, duration: 0.3, onComplete: () => { card.style.display = 'none'; }});
+                }
+            });
+        });
     }
 });

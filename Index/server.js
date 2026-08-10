@@ -18,6 +18,7 @@ const supabase = createClient(
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(__dirname));
 
 // ==========================================
 // ROTAS DA API
@@ -157,6 +158,84 @@ app.post('/api/admin/settings', async (req, res) => {
 
     if (error) return res.status(500).json({ error: 'Erro ao salvar configurações.' });
     res.json({ message: 'Configurações salvas com sucesso!' });
+});
+
+// ==========================================
+// ROTAS DA GALERIA DE EVENTOS (Salva em Settings JSON)
+// ==========================================
+
+app.get('/api/events_gallery', async (req, res) => {
+    const { data, error } = await supabase.from('settings').select('*').eq('key', 'events_gallery');
+    if (error) return res.status(500).json({ error: 'Erro ao buscar galeria.' });
+    
+    let events = [];
+    if (data && data.length > 0 && data[0].value) {
+        try {
+            events = JSON.parse(data[0].value);
+        } catch(e) {
+            events = [];
+        }
+    }
+    res.json({ events });
+});
+
+app.post('/api/admin/events_gallery', async (req, res) => {
+    if (req.headers.authorization !== 'Bearer fake-jwt-token') {
+        return res.status(401).json({ error: 'Não autorizado.' });
+    }
+    const { title, location, image_url } = req.body;
+    if (!title || !location || !image_url) return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
+
+    // 1. Buscar array existente
+    const { data: get_data } = await supabase.from('settings').select('value').eq('key', 'events_gallery');
+    let events = [];
+    if (get_data && get_data.length > 0 && get_data[0].value) {
+        try { events = JSON.parse(get_data[0].value); } catch(e) {}
+    }
+
+    // 2. Adicionar novo evento
+    const newEvent = {
+        id: Date.now().toString(), // ID único baseado em timestamp
+        title,
+        location,
+        image_url
+    };
+    events.push(newEvent);
+
+    // 3. Salvar array atualizado
+    const { error } = await supabase.from('settings').upsert([{ key: 'events_gallery', value: JSON.stringify(events) }], { onConflict: 'key' });
+    if (error) return res.status(500).json({ error: 'Erro ao salvar evento na galeria.' });
+    
+    res.status(201).json({ message: 'Evento adicionado com sucesso!', event: newEvent });
+});
+
+app.delete('/api/admin/events_gallery/:id', async (req, res) => {
+    if (req.headers.authorization !== 'Bearer fake-jwt-token') {
+        return res.status(401).json({ error: 'Não autorizado.' });
+    }
+    
+    // 1. Buscar array existente
+    const { data: get_data } = await supabase.from('settings').select('value').eq('key', 'events_gallery');
+    if (!get_data || get_data.length === 0 || !get_data[0].value) {
+        return res.status(404).json({ error: 'Galeria não encontrada.' });
+    }
+    
+    let events = [];
+    try { events = JSON.parse(get_data[0].value); } catch(e) {}
+
+    // 2. Filtrar removendo o id selecionado
+    const initialLength = events.length;
+    events = events.filter(ev => ev.id !== req.params.id);
+    
+    if (events.length === initialLength) {
+        return res.status(404).json({ error: 'Evento não encontrado.' });
+    }
+
+    // 3. Salvar array atualizado
+    const { error } = await supabase.from('settings').upsert([{ key: 'events_gallery', value: JSON.stringify(events) }], { onConflict: 'key' });
+    if (error) return res.status(500).json({ error: 'Erro ao excluir evento da galeria.' });
+    
+    res.json({ message: 'Deletado com sucesso.' });
 });
 
 // ==========================================

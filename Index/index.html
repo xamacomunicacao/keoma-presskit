@@ -105,6 +105,21 @@
         </div>
     </section>
 
+    <!-- Lightbox/Carrossel do Álbum (Oculto por padrão) -->
+    <div id="album-lightbox" class="lightbox-overlay">
+        <div class="lightbox-content">
+            <span class="lightbox-close" onclick="closeLightbox()"><i class="fa-solid fa-xmark"></i></span>
+            <div class="lightbox-image-container">
+                <img id="lightbox-main-img" src="" alt="Album Photo">
+                <button class="lightbox-nav prev" onclick="navigateLightbox(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                <button class="lightbox-nav next" onclick="navigateLightbox(1)"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+            <div class="lightbox-thumbnails" id="lightbox-thumbnails">
+                <!-- Miniaturas geradas via JS -->
+            </div>
+        </div>
+    </div>
+
     <!-- Instagram Section -->
     <section class="instagram-section section-padding" id="instagram" style="display: none;">
         <div class="container">
@@ -218,6 +233,72 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <script src="js/animations.js"></script>
     <script>
+        // ==========================================
+        // LÓGICA DO LIGHTBOX (CARROSSEL DE ÁLBUNS)
+        // ==========================================
+        let currentAlbum = [];
+        let currentIndex = 0;
+
+        function openLightbox(albumJsonString) {
+            try {
+                // Tenta fazer o parse usando as entidades de volta
+                const cleanedStr = albumJsonString.replace(/&quot;/g, '"').replace(/&apos;/g, "'");
+                currentAlbum = JSON.parse(cleanedStr);
+            } catch (e) {
+                console.error("Erro ao ler album", e);
+                return;
+            }
+
+            if (!currentAlbum || currentAlbum.length === 0) return;
+
+            currentIndex = 0;
+            document.getElementById('album-lightbox').classList.add('active');
+            updateLightboxView();
+            renderThumbnails();
+            
+            // Ocultar scrollbar da página
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            document.getElementById('album-lightbox').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        function navigateLightbox(direction) {
+            currentIndex += direction;
+            if (currentIndex < 0) currentIndex = currentAlbum.length - 1;
+            if (currentIndex >= currentAlbum.length) currentIndex = 0;
+            updateLightboxView();
+            highlightThumbnail();
+        }
+
+        function goToSlide(index) {
+            currentIndex = index;
+            updateLightboxView();
+            highlightThumbnail();
+        }
+
+        function updateLightboxView() {
+            const imgEl = document.getElementById('lightbox-main-img');
+            imgEl.src = currentAlbum[currentIndex];
+        }
+
+        function renderThumbnails() {
+            const container = document.getElementById('lightbox-thumbnails');
+            container.innerHTML = currentAlbum.map((url, i) => `
+                <img src="${url}" class="thumb ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})">
+            `).join('');
+        }
+
+        function highlightThumbnail() {
+            const thumbs = document.querySelectorAll('#lightbox-thumbnails .thumb');
+            thumbs.forEach((t, i) => {
+                if (i === currentIndex) t.classList.add('active');
+                else t.classList.remove('active');
+            });
+        }
+
         document.getElementById('newsletter-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -288,15 +369,21 @@
                 const container = document.getElementById('events-grid');
                 
                 if (data.events && data.events.length > 0) {
-                    container.innerHTML = data.events.map(item => `
-                        <div class="event-card" data-title="${item.title}">
+                    container.innerHTML = data.events.map(item => {
+                        // Passando o array de URLs do album como string JSON segura para usar no onclick
+                        const albumData = (item.album_urls && item.album_urls.length > 0) ? item.album_urls : [item.image_url];
+                        const albumJson = JSON.stringify(albumData).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+                        
+                        return `
+                        <div class="event-card" data-title="${item.title}" onclick="openLightbox('${albumJson}')">
                             <img src="${item.image_url}" alt="${item.title}">
                             <div class="event-card-info">
                                 <h4>${item.title}</h4>
                                 <p>${item.location}</p>
                             </div>
                         </div>
-                    `).join('');
+                        `;
+                    }).join('');
                 } else {
                     container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #888;">Nenhuma foto na galeria.</div>';
                 }

@@ -656,12 +656,37 @@
                 
                 if (data.events && data.events.length > 0) {
                     data.events.forEach(item => {
+                        // Monta o HTML das imagens com o 'x' de excluir
+                        let imagesHtml = '';
+                        
+                        // Imagem de Capa
+                        if (item.image_url) {
+                            imagesHtml += `
+                                <div style="position: relative; display: inline-block; margin: 2px;">
+                                    <img src="${item.image_url}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px; border: 2px solid var(--accent-color);">
+                                    <button onclick="deleteGalleryImage('${item.id}', '${item.image_url}')" style="position: absolute; top: -5px; right: -5px; background: red; color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">X</button>
+                                </div>
+                            `;
+                        }
+                        
+                        // Imagens do Álbum
+                        if (item.album_urls && item.album_urls.length > 0) {
+                            item.album_urls.forEach(url => {
+                                imagesHtml += `
+                                    <div style="position: relative; display: inline-block; margin: 2px;">
+                                        <img src="${url}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+                                        <button onclick="deleteGalleryImage('${item.id}', '${url}')" style="position: absolute; top: -5px; right: -5px; background: red; color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">X</button>
+                                    </div>
+                                `;
+                            });
+                        }
+
                         tbody.innerHTML += `
                             <tr>
-                                <td><img src="${item.image_url}" alt="thumb" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;"></td>
+                                <td style="max-width: 250px; flex-wrap: wrap;">${imagesHtml}</td>
                                 <td>${item.title}</td>
                                 <td>${item.location}</td>
-                                <td><button onclick="deleteGallery('${item.id}')" style="width: auto; padding: 5px 10px; background: red; color: white; font-size: 0.7rem;"><i class="fa-solid fa-trash"></i> Excluir</button></td>
+                                <td><button onclick="deleteGallery('${item.id}')" style="width: auto; padding: 5px 10px; background: red; color: white; font-size: 0.7rem;"><i class="fa-solid fa-trash"></i> Excluir Álbum</button></td>
                             </tr>
                         `;
                     });
@@ -753,7 +778,7 @@
         }
 
         async function deleteGallery(id) {
-            if (!confirm('Tem certeza que deseja excluir esta foto da galeria?')) return;
+            if (!confirm('Tem certeza que deseja excluir o ÁLBUM INTEIRO?')) return;
             try {
                 const res = await fetch(`/api/admin/events_gallery/${id}`, {
                     method: 'DELETE',
@@ -763,7 +788,28 @@
                     loadGallery();
                 }
             } catch (err) {
-                alert('Erro ao excluir evento da galeria.');
+                alert('Erro ao excluir álbum da galeria.');
+            }
+        }
+
+        async function deleteGalleryImage(id, imageUrl) {
+            if (!confirm('Excluir esta imagem específica do álbum?')) return;
+            try {
+                const res = await fetch(`/api/admin/events_gallery/${id}/image`, {
+                    method: 'DELETE',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` 
+                    },
+                    body: JSON.stringify({ imageUrl })
+                });
+                if (res.ok) {
+                    loadGallery();
+                } else {
+                    alert('Erro ao excluir a imagem. ' + (await res.json()).error);
+                }
+            } catch (err) {
+                alert('Erro de conexão ao tentar excluir a imagem.');
             }
         }
 

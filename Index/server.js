@@ -253,29 +253,65 @@ app.delete('/api/admin/events_gallery/:id', async (req, res) => {
     if (req.headers.authorization !== 'Bearer fake-jwt-token') {
         return res.status(401).json({ error: 'Não autorizado.' });
     }
-    
-    // 1. Buscar array existente
+    const { id } = req.params;
+
     const { data: get_data } = await supabase.from('settings').select('value').eq('key', 'events_gallery');
-    if (!get_data || get_data.length === 0 || !get_data[0].value) {
-        return res.status(404).json({ error: 'Galeria não encontrada.' });
-    }
-    
+    if (!get_data || get_data.length === 0) return res.status(404).json({ error: 'Galeria vazia.' });
+
     let events = [];
     try { events = JSON.parse(get_data[0].value); } catch(e) {}
 
-    // 2. Filtrar removendo o id selecionado
-    const initialLength = events.length;
-    events = events.filter(ev => ev.id !== req.params.id);
+    const updatedEvents = events.filter(e => e.id !== id);
+
+    const { error } = await supabase.from('settings').update({ value: JSON.stringify(updatedEvents) }).eq('key', 'events_gallery');
+    if (error) return res.status(500).json({ error: 'Erro ao deletar evento.' });
     
-    if (events.length === initialLength) {
-        return res.status(404).json({ error: 'Evento não encontrado.' });
+    res.json({ message: 'Evento deletado com sucesso!' });
+});
+
+app.delete('/api/admin/events_gallery/:id/image', async (req, res) => {
+    if (req.headers.authorization !== 'Bearer fake-jwt-token') {
+        return res.status(401).json({ error: 'Não autorizado.' });
+    }
+    const { id } = req.params;
+    const { imageUrl } = req.body;
+
+    if (!imageUrl) return res.status(400).json({ error: 'URL da imagem é obrigatória.' });
+
+    const { data: get_data } = await supabase.from('settings').select('value').eq('key', 'events_gallery');
+    if (!get_data || get_data.length === 0) return res.status(404).json({ error: 'Galeria vazia.' });
+
+    let events = [];
+    try { events = JSON.parse(get_data[0].value); } catch(e) {}
+
+    const eventIndex = events.findIndex(e => e.id === id);
+    if (eventIndex === -1) return res.status(404).json({ error: 'Evento não encontrado.' });
+
+    const ev = events[eventIndex];
+    let changed = false;
+
+    // Se for a capa
+    if (ev.image_url === imageUrl) {
+        if (ev.album_urls && ev.album_urls.length > 0) {
+            // Promove a primeira foto do album para capa
+            ev.image_url = ev.album_urls.shift();
+        } else {
+            ev.image_url = ''; // Fica sem capa
+        }
+        changed = true;
+    } 
+    // Se for foto do álbum
+    else if (ev.album_urls && ev.album_urls.includes(imageUrl)) {
+        ev.album_urls = ev.album_urls.filter(url => url !== imageUrl);
+        changed = true;
     }
 
-    // 3. Salvar array atualizado
-    const { error } = await supabase.from('settings').upsert([{ key: 'events_gallery', value: JSON.stringify(events) }], { onConflict: 'key' });
-    if (error) return res.status(500).json({ error: 'Erro ao excluir evento da galeria.' });
+    if (!changed) return res.status(404).json({ error: 'Imagem não encontrada neste evento.' });
+
+    const { error } = await supabase.from('settings').update({ value: JSON.stringify(events) }).eq('key', 'events_gallery');
+    if (error) return res.status(500).json({ error: 'Erro ao atualizar evento.' });
     
-    res.json({ message: 'Deletado com sucesso.' });
+    res.json({ message: 'Imagem removida com sucesso!' });
 });
 
 // ==========================================

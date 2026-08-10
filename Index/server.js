@@ -3,6 +3,10 @@ const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
 const cors = require('cors');
 const { Resend } = require('resend');
+const multer = require('multer');
+
+// Configuração do Multer (mantém os arquivos em memória)
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -164,6 +168,41 @@ app.post('/api/admin/settings', async (req, res) => {
 // ROTAS DA GALERIA DE EVENTOS (Salva em Settings JSON)
 // ==========================================
 
+// Rota para Upload de Imagens no Supabase Storage
+app.post('/api/admin/upload', upload.array('files', 20), async (req, res) => {
+    if (req.headers.authorization !== 'Bearer fake-jwt-token') {
+        return res.status(401).json({ error: 'Não autorizado.' });
+    }
+    
+    if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ error: 'Nenhum arquivo enviado.' });
+    }
+
+    const uploadedUrls = [];
+
+    for (const file of req.files) {
+        // Gera um nome único para evitar conflitos
+        const fileName = `${Date.now()}_${Math.round(Math.random() * 1E9)}_${file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, '')}`;
+        
+        const { data, error } = await supabase.storage
+            .from('gallery')
+            .upload(`events/${fileName}`, file.buffer, {
+                contentType: file.mimetype,
+                upsert: false
+            });
+
+        if (error) {
+            console.error('Erro no upload para o Supabase:', error);
+            return res.status(500).json({ error: 'Erro ao fazer upload da imagem.', details: error });
+        }
+
+        const publicUrlData = supabase.storage.from('gallery').getPublicUrl(data.path);
+        uploadedUrls.push(publicUrlData.data.publicUrl);
+    }
+
+    res.json({ urls: uploadedUrls });
+});
+
 app.get('/api/events_gallery', async (req, res) => {
     const { data, error } = await supabase.from('settings').select('*').eq('key', 'events_gallery');
     if (error) return res.status(500).json({ error: 'Erro ao buscar galeria.' });
@@ -183,7 +222,7 @@ app.post('/api/admin/events_gallery', async (req, res) => {
     if (req.headers.authorization !== 'Bearer fake-jwt-token') {
         return res.status(401).json({ error: 'Não autorizado.' });
     }
-    const { title, location, image_url } = req.body;
+    const { title, location, image_url, album_urls } = req.body;
     if (!title || !location || !image_url) return res.status(400).json({ error: 'Todos os campos são obrigatórios.' });
 
     // 1. Buscar array existente
@@ -198,7 +237,8 @@ app.post('/api/admin/events_gallery', async (req, res) => {
         id: Date.now().toString(), // ID único baseado em timestamp
         title,
         location,
-        image_url
+        image_url,
+        album_urls: album_urls || []
     };
     events.push(newEvent);
 

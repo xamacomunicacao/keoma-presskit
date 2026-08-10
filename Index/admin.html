@@ -227,7 +227,16 @@
             <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
                 <input type="text" id="gallery-title" placeholder="Nome do Evento (ex: Tomorrowland)" style="flex: 1; margin-bottom: 0;">
                 <input type="text" id="gallery-location" placeholder="Local (ex: São Paulo, SP)" style="flex: 1; margin-bottom: 0;">
-                <input type="text" id="gallery-image" placeholder="URL da Imagem (ex: https://...)" style="flex: 2; margin-bottom: 0;">
+            </div>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; background: #111; padding: 15px; border-radius: 5px; border: 1px solid var(--accent-color);">
+                <div style="flex: 1;">
+                    <label style="display: block; margin-bottom: 5px; font-size: 0.8rem; color: #888; text-transform: uppercase;">Imagem de Capa (1 arquivo)</label>
+                    <input type="file" id="gallery-cover" accept="image/*" style="width: 100%; color: #fff; background: #222; border: none; padding: 10px; border-radius: 3px;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="display: block; margin-bottom: 5px; font-size: 0.8rem; color: #888; text-transform: uppercase;">Fotos do Álbum (Múltiplas)</label>
+                    <input type="file" id="gallery-album" accept="image/*" multiple style="width: 100%; color: #fff; background: #222; border: none; padding: 10px; border-radius: 3px;">
+                </div>
             </div>
             <button onclick="addGallery()" id="btn-add-gallery" style="width: auto; padding: 10px 20px; font-size: 0.8rem;"><i class="fa-solid fa-plus"></i> Adicionar à Galeria</button>
             <p id="gallery-status-msg" style="margin-top: 15px; font-weight: 600;"></p>
@@ -667,36 +676,69 @@
         async function addGallery() {
             const title = document.getElementById('gallery-title').value;
             const location = document.getElementById('gallery-location').value;
-            const image_url = document.getElementById('gallery-image').value;
+            const coverInput = document.getElementById('gallery-cover');
+            const albumInput = document.getElementById('gallery-album');
             const statusMsg = document.getElementById('gallery-status-msg');
             const btn = document.getElementById('btn-add-gallery');
 
-            if (!title || !location || !image_url) {
-                statusMsg.innerText = 'Preencha todos os campos!';
+            if (!title || !location || coverInput.files.length === 0) {
+                statusMsg.innerText = 'Preencha o título, local e selecione a Capa!';
                 statusMsg.style.color = 'red';
                 return;
             }
 
             btn.disabled = true;
-            statusMsg.innerText = 'Salvando...';
+            statusMsg.innerText = 'Fazendo upload das imagens... Aguarde.';
             statusMsg.style.color = '#fff';
 
             try {
+                // 1. Fazer upload de todas as imagens (Capa + Álbum)
+                const formData = new FormData();
+                formData.append('files', coverInput.files[0]); // Capa sempre primeiro
+                for (let i = 0; i < albumInput.files.length; i++) {
+                    formData.append('files', albumInput.files[i]);
+                }
+
+                const uploadRes = await fetch('/api/admin/upload', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                
+                if (!uploadRes.ok) {
+                    const errText = await uploadRes.text();
+                    console.error("Upload error:", errText);
+                    throw new Error('Falha no upload das imagens. O Bucket "gallery" está público?');
+                }
+                const uploadData = await uploadRes.json();
+                
+                const coverUrl = uploadData.urls[0];
+                const albumUrls = uploadData.urls.slice(1);
+
+                // 2. Salvar o evento
+                statusMsg.innerText = 'Salvando evento no banco...';
+                
                 const res = await fetch('/api/admin/events_gallery', {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({ title, location, image_url })
+                    body: JSON.stringify({ 
+                        title, 
+                        location, 
+                        image_url: coverUrl,
+                        album_urls: albumUrls
+                    })
                 });
 
                 if (res.ok) {
-                    statusMsg.innerText = 'Adicionado com sucesso!';
+                    statusMsg.innerText = 'Álbum adicionado com sucesso!';
                     statusMsg.style.color = '#4CAF50';
                     document.getElementById('gallery-title').value = '';
                     document.getElementById('gallery-location').value = '';
-                    document.getElementById('gallery-image').value = '';
+                    document.getElementById('gallery-cover').value = '';
+                    document.getElementById('gallery-album').value = '';
                     loadGallery();
                 } else {
                     statusMsg.innerText = 'Erro ao adicionar.';

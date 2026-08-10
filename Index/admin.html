@@ -717,28 +717,34 @@
             statusMsg.style.color = '#fff';
 
             try {
-                // 1. Fazer upload de todas as imagens (Capa + Álbum)
-                const formData = new FormData();
-                formData.append('files', coverInput.files[0]); // Capa sempre primeiro
-                for (let i = 0; i < albumInput.files.length; i++) {
-                    formData.append('files', albumInput.files[i]);
+                // 1. Fazer upload de todas as imagens (Capa + Álbum) UMA POR UMA para evitar limite de 4.5MB do Vercel
+                let uploadedUrls = [];
+                
+                // Função auxiliar para fazer upload de um arquivo
+                async function uploadFile(file) {
+                    const formData = new FormData();
+                    formData.append('files', file);
+                    const uploadRes = await fetch('/api/admin/upload', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` },
+                        body: formData
+                    });
+                    if (!uploadRes.ok) throw new Error('Falha no upload');
+                    const uploadData = await uploadRes.json();
+                    return uploadData.urls[0];
                 }
 
-                const uploadRes = await fetch('/api/admin/upload', {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` },
-                    body: formData
-                });
-                
-                if (!uploadRes.ok) {
-                    const errText = await uploadRes.text();
-                    console.error("Upload error:", errText);
-                    throw new Error('Falha no upload das imagens. O Bucket "gallery" está público?');
+                // Upload Capa
+                statusMsg.innerText = 'Enviando Capa (1/1)...';
+                const coverUrl = await uploadFile(coverInput.files[0]);
+
+                // Upload Album
+                const albumUrls = [];
+                for (let i = 0; i < albumInput.files.length; i++) {
+                    statusMsg.innerText = `Enviando foto do álbum (${i+1}/${albumInput.files.length})...`;
+                    const url = await uploadFile(albumInput.files[i]);
+                    albumUrls.push(url);
                 }
-                const uploadData = await uploadRes.json();
-                
-                const coverUrl = uploadData.urls[0];
-                const albumUrls = uploadData.urls.slice(1);
 
                 // 2. Salvar o evento
                 statusMsg.innerText = 'Salvando evento no banco...';
